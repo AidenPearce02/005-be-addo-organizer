@@ -86,6 +86,13 @@ def create():
     return redirect(url_for("index"))
 
 
+@app.route('/delete/task/<int:task_id>', methods=["GET"])
+def delete(task_id):
+    q = Task.delete().where(Task.id == task_id)
+    q.execute()
+    return redirect(url_for("index"))
+
+
 @app.route('/edit/task/<int:task_id>', methods=["GET", "POST"])
 def edit(task_id):
 
