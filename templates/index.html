@@ -1,0 +1,61 @@
+{% extends "base_layout.html" %}
+{% block content %}
+
+
+{% if g.user.is_authenticated %}
+<h1>Hello, {{ g.user.username }}</h1>
+<a href="/create">Create task</a>
+<a href="/logout">Logout</a><br/><br/>
+<br/>
+<table class="table table-bordered">
+    <tr>
+        <td>
+            Topic
+        </td>
+        <td>
+            Task
+        </td>
+        <td>
+            Date
+        </td>
+        <td>
+            Change
+        </td>
+    </tr>
+{% for value in tasks.select()%}
+    {% if g.user.username == value.username%}
+    {% if value.state == True%}
+    <tr class="success">
+        <td>{{value.topic}}</td>
+        <td>{{value.task}}</td>
+        <td>{{value.date}}</td>
+        <td><a href="/edit/task/{{value.get_id()}}">Edit</a></td>
+    </tr>
+    {% endif %}
+    {%if value.state == False and value.date>today%}
+    <tr class="active">
+        <td>{{value.topic}}</td>
+        <td>{{value.task}}</td>
+        <td>{{value.date}}</td>
+        <td><a href="/edit/task/{{value.get_id()}}">Edit</a></td>
+    </tr>
+    {% endif %}
+    {% if value.state == False and value.date<=today%}
+    <tr class="warning">
+        <td>{{value.topic}}</td>
+        <td>{{value.task}}</td>
+        <td>{{value.date}}</td>
+        <td><a href="/edit/task/{{value.get_id()}}">Edit</a></td>
+    </tr>
+    {% endif %}
+    {% endif %}
+{% endfor %}
+    </table>
+{% else %}
+<h1>Main page</h1>
+<a href="/login">Login</a>
+<a href="/registration">Registration</a>
+{% endif %}
+
+
+{% endblock %}
