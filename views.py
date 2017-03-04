@@ -1,6 +1,6 @@
 from datetime import date,datetime
 from flask import Flask
-from flask import g, request, redirect, url_for, render_template
+from flask import g, request, redirect, url_for, render_template,flash
 from flask_login import LoginManager, current_user, login_user, logout_user
 
 from models import User, Task, initialize_databases
@@ -38,9 +38,11 @@ def login():
     registered_user = User.filter(User.username == username).first()
 
     if registered_user is None:
+        flash('Username is not found')
         return redirect(url_for("login"))  # redirect back to login page if can't wasn't found
 
     if not registered_user.password.check_password(password):
+        flash('Password is wrong')
         return redirect(url_for("login"))  # redirect back to login page if incorrect password
 
     login_user(registered_user)
@@ -61,7 +63,10 @@ def registration():
 
     username = request.form["username"]
     password = request.form["password"]
-
+    user = User.filter(User.username == username).first()
+    if user is not None:
+        flash('Username was used')
+        return redirect(url_for("registration"))
     User.create(username=username, password=password)
 
     return redirect(url_for("index"))
