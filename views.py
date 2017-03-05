@@ -2,10 +2,12 @@ from datetime import datetime
 from flask import Flask
 from flask import g, request, redirect, url_for, render_template,flash
 from flask_login import LoginManager, current_user, login_user, logout_user
+from flask_bootstrap import Bootstrap
 
-from models import User, Task, initialize_databases
+from models import LARForm, EACForm, User, Task, initialize_databases
 
 app = Flask("TaskList")
+Bootstrap(app   )
 app.secret_key = "super secret key"
 
 login_manager = LoginManager(app)
@@ -29,24 +31,19 @@ def index():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "GET":
-        return render_template("login.html")
-
-    username = request.form["username"]
-    password = request.form["password"]
-
-    registered_user = User.filter(User.username == username).first()
-
-    if registered_user is None:
-        flash('Username is not found')
-        return redirect(url_for("login"))  # redirect back to login page if can't wasn't found
-
-    if not registered_user.password.check_password(password):
-        flash('Password is wrong')
-        return redirect(url_for("login"))  # redirect back to login page if incorrect password
-
-    login_user(registered_user)
-    return redirect(request.args.get("next") or url_for("index"))
+    form = LARForm()
+    if request.method == 'POST':
+        registered_user = User.filter(User.username == form.username.data).first()
+        if registered_user is None:
+            flash('Username is not found')
+            return redirect(url_for("login"))  # redirect back to login page if can't wasn't found
+        if not registered_user.password.check_password(form.password.data):
+            flash('Password is wrong')
+            return redirect(url_for("login"))  # redirect back to login page if incorrect password
+        login_user(registered_user)
+        flash('Login completed successfully')
+        return redirect(request.args.get("next") or url_for("index"))
+    return render_template("login.html", form=form)
 
 
 @app.route("/logout")
@@ -57,33 +54,26 @@ def logout():
 
 @app.route('/registration', methods=["GET", "POST"])
 def registration():
-
-    if request.method == "GET":
-        return render_template("registration.html")
-
-    username = request.form["username"]
-    password = request.form["password"]
-    user = User.filter(User.username == username).first()
-    if user is not None:
-        flash('Username was used')
-        return redirect(url_for("registration"))
-    User.create(username=username, password=password)
-
-    return redirect(url_for("index"))
+    form = LARForm()
+    if request.method == 'POST':
+        registered_user = User.filter(User.username == form.username.data).first()
+        if registered_user is not None:
+            flash('Username was used')
+            return redirect(url_for("registration"))
+        User.create(username=form.username.data,password=form.password.data)
+        flash('Registration completed successfully')
+        return redirect(url_for("index"))
+    return render_template("registration.html", form=form)
 
 
 @app.route('/create', methods=["GET", "POST"])
 def create():
-
-    if request.method == "GET":
-        return render_template("create.html")
-
-    topic = request.form["topic"]
-    task = request.form["task"]
-    date = datetime.strptime(request.form["date"],'%d.%m.%Y').date()
-    Task.create(username=g.user.username, topic=topic,task=task,date=date)
-
-    return redirect(url_for("index"))
+    form = EACForm()
+    if request.method == "POST":
+        Task.create(username=g.user.username, topic=form.topic.data, task=form.task.data, date=form.date.data)
+        flash('Task created successfully')
+        return redirect(url_for("index"))
+    return render_template("create.html",form=form)
 
 
 @app.route('/delete/task/<int:task_id>', methods=["GET"])
@@ -95,19 +85,18 @@ def delete(task_id):
 
 @app.route('/edit/task/<int:task_id>', methods=["GET", "POST"])
 def edit(task_id):
-
-    if request.method == "GET":
-        return render_template("edit.html",task=Task.get(Task.id == task_id),task_id=task_id)
-
-    topic = request.form["topic"]
-    task = request.form["task"]
-    date = request.form["date"]
-    state = False
-    if request.form.get('state') == "on":
-        state = True
-    q = Task.update(topic=topic, task=task, date=date, state=state).where(Task.id == task_id)
-    q.execute()
-    return redirect(url_for("index"))
+    form = EACForm()
+    if request.method == "POST":
+        q = Task.update(topic=form.topic.data, task=form.task.data, date=form.date.data, state=form.state.data).where(Task.id == task_id)
+        q.execute()
+        flash('Task edited successfully')
+        return redirect(url_for("index"))
+    task = Task.get(Task.id == task_id)
+    form.topic.data = task.topic
+    form.task.data = task.task
+    form.date.data = task.date
+    form.state.data = task.state
+    return render_template("edit.html",form=form,task_id=task_id)
 
 if __name__ == "__main__":
     initialize_databases()

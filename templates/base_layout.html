@@ -1,16 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Organizer</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bower_components/bootstrap/dist/css/bootstrap.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-
-{% block content %}
-
-{% endblock %}
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block html_attribs %} lang="en"{% endblock %}
+    {% block metas %}<meta charset="UTF-8">{% endblock %}
+    {% block title %}Organizer{% endblock %}
+    {% block styles %}
+    {{super()}}
+    <link rel="stylesheet"
+      href="{{url_for('.static', filename='bower_components/bootstrap/dist/css/bootstrap.css')}}">
+    <link rel="stylesheet"
+      href="{{url_for('.static', filename='style.css')}}">
+    {% endblock %}
+{% block body %}
 {% with messages = get_flashed_messages() %}
   {% if messages %}
     {% for message in messages %}
@@ -18,5 +18,7 @@
     {% endfor %}
   {% endif %}
 {% endwith %}
-</body>
-</html>
+{% block content %}
+
+{% endblock %}
+{% endblock %}
