@@ -7,7 +7,7 @@ from flask_bootstrap import Bootstrap
 from models import LARForm, EACForm, User, Task, initialize_databases
 
 app = Flask("TaskList")
-Bootstrap(app   )
+Bootstrap(app )
 app.secret_key = "super secret key"
 
 login_manager = LoginManager(app)
@@ -32,7 +32,7 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LARForm()
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate_on_submit():
         registered_user = User.filter(User.username == form.username.data).first()
         if registered_user is None:
             flash('Username is not found')
@@ -55,7 +55,7 @@ def logout():
 @app.route('/registration', methods=["GET", "POST"])
 def registration():
     form = LARForm()
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate_on_submit():
         registered_user = User.filter(User.username == form.username.data).first()
         if registered_user is not None:
             flash('Username was used')
@@ -80,6 +80,7 @@ def create():
 def delete(task_id):
     q = Task.delete().where(Task.id == task_id)
     q.execute()
+    flash('Task was deleted')
     return redirect(url_for("index"))
 
 

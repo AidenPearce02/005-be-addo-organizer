@@ -3,8 +3,7 @@ from playhouse.fields import PasswordField as pf
 from flask_wtf import FlaskForm
 from wtforms import StringField, BooleanField, DateField, PasswordField, validators
 
-dbU = pw.SqliteDatabase('databaseU.db')
-dbT = pw.SqliteDatabase('databaseT.db')
+db = pw.SqliteDatabase('database.db')
 
 
 def initialize_databases():
@@ -19,12 +18,12 @@ def initialize_databases():
         pass
 
 
-class BaseModelU(pw.Model):
+class BaseModel(pw.Model):
     class Meta:
-        database = dbU
+        database = db
 
 
-class User(BaseModelU):
+class User(BaseModel):
     username = pw.CharField(max_length=70, unique=True)
     password = pf()
     state = pw.BooleanField(default=True)
@@ -45,12 +44,7 @@ class User(BaseModelU):
         return '<User %r>' % (self.username)
 
 
-class BaseModelT(pw.Model):
-    class Meta:
-        database = dbT
-
-
-class Task(BaseModelT):
+class Task(BaseModel):
     username = pw.CharField(max_length=70)
     topic = pw.CharField(max_length=70)
     task = pw.CharField(max_length=250)
@@ -71,7 +65,7 @@ class LARForm(FlaskForm):
     username = StringField('Username', [validators.DataRequired(), validators.Length(min=4, max=25)])
     password = PasswordField('Password', [
         validators.DataRequired(),
-        validators.Length(min=6, max=25)
+        validators.Length(min=3, max=25)
     ])
 
 
