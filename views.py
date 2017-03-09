@@ -69,8 +69,10 @@ def registration():
 @app.route('/create', methods=["GET", "POST"])
 def create():
     form = EACForm()
-    if request.method == "POST":
-        Task.create(username=g.user.username, topic=form.topic.data, task=form.task.data, date=form.date.data)
+    form.state.data=False
+    if request.method == "POST" and form.validate():
+        task_creater = User.filter(User.username == g.user.username).first()
+        Task.create(user=task_creater, topic=form.topic.data, task=form.task.data, date=form.date.data)
         flash('Task created successfully')
         return redirect(url_for("index"))
     return render_template("create.html",form=form)

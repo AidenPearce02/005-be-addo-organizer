@@ -23,7 +23,7 @@
         </td>
     </tr>
 {% for value in tasks.select()%}
-    {% if g.user.username == value.username%}
+    {% if g.user == value.user%}
     {% if value.state == True%}
     <tr class="success">
         <td>{{value.topic}}</td>

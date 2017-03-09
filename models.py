@@ -45,7 +45,7 @@ class User(BaseModel):
 
 
 class Task(BaseModel):
-    username = pw.CharField(max_length=70)
+    user = pw.ForeignKeyField(User)
     topic = pw.CharField(max_length=70)
     task = pw.CharField(max_length=250)
     date = pw.DateField()
